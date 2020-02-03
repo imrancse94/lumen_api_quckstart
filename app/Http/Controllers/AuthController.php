@@ -5,47 +5,50 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
-
-
+use App\Repositories\UserRepository;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
 
 
-    private $repository;
+    private $userRepository;
 
-    public function __construct()
+    public function __construct(UserRepository $userRepository)
     {
+        $this->userRepository = $userRepository;
         $this->middleware('jwt.auth', ['except' => ['login', 'register']]);
     }
 
     public function me()
     {
-        $auth_user = auth()->user();
+        $auth_user = Auth::user();
         $data['user'] = $auth_user;
         $data['permission'] = $this->getAllPermissions();
-        return $this->sendApiResponse(true, 'Sucessfully logged in', $data, config('apiconstants.API_LOGIN_SUCCESS'));
+        return $this->sendApiResponse(true, 'Sucessfully logged in', $data, config('API_LOGIN_SUCCESS'));
     }
 
 
     public function logout()
     {
-        auth()->logout();
+        Auth::logout();
         return $this->sendApiResponse(true, 'Sucessfully logged out', [], config('apiconstants.API_LOGIN_SUCCESS'));
     }
 
     public function login(LoginRequest $request)
     {
 
-        $credentials = request(['email', 'password']);
+        $credentials['email'] = $request->email;
+        $credentials['password'] = $request->password;
         $status = false;
         $data = [];
         $message = "User not found";
         $statusCode = config('apiconstants.API_LOGIN_FAILED');
-        if ($token = auth()->attempt($credentials)) {
-            $auth_id = auth()->user()->id;
+        if ($token = $this->guard()->attempt($credentials)) {
+            $auth = $this->guard()->user();
+            $auth_id = $auth->id;
             $data = $this->respondWithToken($token);
-            $data['permission'] = $this->repository->setPermissionByUserId($auth_id);
+            $data['permission'] = $this->userRepository->setPermissionByUserId($auth_id);
             $file_name = $auth_id . ".json";
             $dir = $auth_id;
             $content = json_encode($data['permission']);
@@ -83,21 +86,25 @@ class AuthController extends Controller
 
     }
 
-    protected function respondWithToken($token)
-    {
-        return [
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => auth()->user(),
-        ];
-    }
-
 
     public function refresh()
     {
         return $this->sendResponse($this->respondWithToken(auth()->refresh()), "Successfully refreshed token");
     }
 
+    protected function respondWithToken($token)
+    {
+        return [
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => $this->guard()->factory()->getTTL() * 60
+        ];
+    }
+
+
+    public function guard()
+    {
+        return Auth::guard();
+    }
 
 }

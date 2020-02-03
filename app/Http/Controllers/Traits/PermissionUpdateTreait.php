@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers\Traits;
 
-use DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Module;
-use RingCentral\SDK\Platform\Auth;
-use Session;
-use Config;
 use Illuminate\Support\Facades\Route;
 trait PermissionUpdateTreait
 {
     public function getPermissionList($user_id)
     {
-        $SUPER_SUPER_ADMIN_ID = Config::get('constants.defines.SSADMIN_ID');
+
+        $SUPER_SUPER_ADMIN_ID = config('app.SSADMIN_ID');
         $sql = 'SELECT  users.id AS user_id,users.permission_version,pages.id AS page_id, pages.name AS page_name,
                                  modules.id AS module_id,submodules.controller_name,submodules.name AS submodule_name, submodules.id
                                  AS submodule_id,pages.route_name,submodules.default_method,pages.is_default_method FROM users
@@ -27,10 +26,11 @@ trait PermissionUpdateTreait
 					WHERE  users.id = ' . $user_id;
 
         $permissions = DB::select($sql);
+
         $moduleSubmodulePageAssoc = [];
         $masterArray = [1001, 1002, 1007];
         if (!empty($permissions)) {
-            if(auth()->user()->id == 1){
+            if(Auth::id() == 1){
                 $modules = Module::with('submodules', 'submodules.pages')->get();
             }else{
                 $modules = Module::with('submodules', 'submodules.pages')->whereNotIn('id',$masterArray)->get();
@@ -38,7 +38,6 @@ trait PermissionUpdateTreait
 
             $moduleSubmodulePageAssoc = $this->getOrganizePermission($modules,$permissions);
         }
-
         return $moduleSubmodulePageAssoc;
     }
 

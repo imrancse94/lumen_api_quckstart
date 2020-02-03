@@ -21,10 +21,14 @@ require_once __DIR__.'/../vendor/autoload.php';
 $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
+$app->configure('app');
+$app->configure('filesystems');
 
  $app->withFacades();
+ //class_alias('Illuminate\Support\Facades\Storage', 'Storage');
 
- $app->withEloquent();
+$app->withEloquent();
+
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +83,9 @@ $app->singleton(
 
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
+$app->register(Pearl\RequestValidate\RequestServiceProvider::class);
+$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
+$app->register(Illuminate\Filesystem\FilesystemServiceProvider::class);
 //$app->register(App\Providers\RepositoryProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
@@ -98,8 +105,6 @@ $app->router->group([
 ], function ($router) {
     require __DIR__.'/../routes/web.php';
 });
-$app->register(Pearl\RequestValidate\RequestServiceProvider::class);
-$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
-$app->configure('app');
+
 
 return $app;

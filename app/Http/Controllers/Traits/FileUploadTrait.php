@@ -2,6 +2,10 @@
 namespace App\Http\Controllers\Traits;
 
 
+use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+
 trait FileUploadTrait
 {
     public function uploadFile($file, $path)
@@ -21,22 +25,16 @@ trait FileUploadTrait
 
     public function filewrite($file_name,$directory,$content){
         $result = false;
+
         try {
             if (!empty($file_name) && !empty($directory) && !empty($content)) {
-                $directory = "storage/".$directory;
-                if (!is_dir($directory)) {
-                    mkdir($directory,0777,true);
-                }
-                $directory .= "/".$file_name;
-                $file = fopen($directory,'w+');
-                fwrite($file,utf8_encode($content));
-                fclose($file);
+                Storage::disk('local')->put($directory."/".$file_name, utf8_encode($content));
                 $result = true;
             }
 
-        }catch (\Exception $e){
+        }catch (Exception $e){
             $error = $e->getMessage();
-
+            dd($error);
         }
 
         return $result;
@@ -45,10 +43,10 @@ trait FileUploadTrait
 
     public function getAllPermissions(){
         $result = [];
-        if(auth()->check()){
-            $auth_id = auth()->user()->id;
-            $file = "storage/".$auth_id."/".$auth_id.".json";
-            $content = file_get_contents($file);
+        if(Auth::check()){
+            $auth_id = Auth::id();
+            $file = $auth_id."/".$auth_id.".json";
+            $content = Storage::disk('local')->get($file);
             $permission = json_decode($content,true);
             if(!empty($permission)){
                 $result = $permission;

@@ -18,14 +18,14 @@
 
 });*/
 
-$router->get('test', 'TestController@index');
+$router->get('test', 'ExampleController@index');
 
 $router->group(['prefix'     => 'api/auth',], function ($router) {
     $router->post('login', 'AuthController@login');
 });
 
 $router->group([
-    'middleware' => ['jwt.auth','developer'],
+    'middleware' => ['auth:api'],
     'prefix'     => 'api/auth',
 ], function ($router) {
     $router->patch('update', 'AuthController@update');
