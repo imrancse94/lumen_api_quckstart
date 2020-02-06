@@ -63,11 +63,20 @@ $app->singleton(
 */
 
 // $app->middleware([
-//     App\Http\Middleware\ExampleMiddleware::class
+//     'Nord\Lumen\Cors\CorsMiddleware',
 // ]);
+
+$app->configure('cors');
+
+$app->middleware([
+    Spatie\Cors\Cors::class,
+]);
+
+$app->register(Spatie\Cors\CorsServiceProvider::class);
 
  $app->routeMiddleware([
      'auth' => App\Http\Middleware\Authenticate::class,
+     //'CorsMiddleware'=>App\Http\Middleware\CorsMiddleware::class
  ]);
 
 /*

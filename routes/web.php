@@ -35,7 +35,7 @@ $router->group([
     $router->post('me', 'AuthController@me');
     $router->post('user/add', 'UserController@userAdd');
     $router->get('usergrouplist', 'UsergroupController@getUserGroupList');
-    $router->get('userlist/{page?}', 'UserController@userList');
+    $router->get('userlist[/{page}]', 'UserController@userList');
     $router->delete('deleteuser/{id}', 'UserController@delete');
     $router->post('addCompany', 'CompanyController@addCompany');
 

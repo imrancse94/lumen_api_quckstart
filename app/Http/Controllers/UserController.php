@@ -9,13 +9,10 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    use DatabaseTransactions;
-
     public function __construct(UserRepository $userRepository){
-        echo "Sdsdsd";exit;
         $this->repository = $userRepository;
-
     }
+
     public function userAdd(UserRequest $request){
         $inputData = $request->all();
         $inputData['company_id'] = auth()->user()->company_id;

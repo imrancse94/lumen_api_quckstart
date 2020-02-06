@@ -6,6 +6,7 @@ use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\Paginator;
 use Laravel\Lumen\Auth\Authorizable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
@@ -45,4 +46,19 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected $hidden = [
         'password',
     ];
+
+    public function getUserList($params = []){
+        $page_limit = 3;
+        $page_no = 1;
+        if(isset($params['page']) && !empty($params['page'])){
+            $page_no = $params['page'];
+        }
+
+        Paginator::currentPageResolver(function () use ($page_no) {
+            return $page_no;
+        });
+        $users = \App\Models\User::paginate($page_limit);
+        return $users;
+    }
+
 }

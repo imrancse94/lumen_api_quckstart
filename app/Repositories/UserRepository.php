@@ -27,7 +27,7 @@ class UserRepository extends Repository {
     }
 
     public function getUserList($inputData){
-        return $this->model()->getUserList($inputData);
+        return $this->getCurrentModel()->getUserList($inputData);
     }
 
     public function userDeleteById($id){

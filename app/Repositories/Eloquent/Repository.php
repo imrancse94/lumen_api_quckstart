@@ -26,7 +26,7 @@ abstract class Repository implements RepositoryInterface, CriteriaInterface {
     /**
      * @var
      */
-    protected $model;
+    private $model;
 
     /**
      * @var Collection
@@ -51,13 +51,16 @@ abstract class Repository implements RepositoryInterface, CriteriaInterface {
     }
 
 
+    public function getCurrentModel(){
+        return $this->model;
+    }
 
     /**
      * Specify Model class name
      *
      * @return mixed
      */
-    public abstract function model();
+    abstract function model();
 
     /**
      * @param array $columns
@@ -131,11 +134,10 @@ abstract class Repository implements RepositoryInterface, CriteriaInterface {
      */
     public function makeModel() {
         $model = $this->app->make($this->model());
-
-        if (!$model instanceof Model)
+        if (!$model instanceof Model){
             throw new RepositoryException("Class {$this->model()} must be an instance of Illuminate\\Database\\Eloquent\\Model");
-
-        return $this->model = $model->newQuery();
+        }
+        return $this->model = $model;
     }
 
     /**
